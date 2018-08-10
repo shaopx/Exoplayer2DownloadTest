@@ -1,11 +1,12 @@
 package com.spx.exoplayer2downloadtest
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.widget.Toast
-import me.weyye.hipermission.HiPermission
-import me.weyye.hipermission.PermissionCallback
-import me.weyye.hipermission.PermissionItem
+import com.hjq.permissions.OnPermission
+import com.hjq.permissions.Permission
+import com.hjq.permissions.XXPermissions
 
 fun Context.showToast(content: String): Toast {
     val toast = Toast.makeText(DemoApplication.application, content, Toast.LENGTH_LONG)
@@ -13,33 +14,20 @@ fun Context.showToast(content: String): Toast {
     return toast
 }
 
-/**
- * 6.0以下版本(系统自动申请) 不会弹框
- * 有些厂商修改了6.0系统申请机制，他们修改成系统自动申请权限了
- */
-fun Context.checkPermission() {
-    val permissionItems = ArrayList<PermissionItem>()
-//        permissionItems.add(PermissionItem(Manifest.permission.READ_PHONE_STATE, "手机状态", R.drawable.permission_ic_phone))
-    permissionItems.add(PermissionItem(Manifest.permission.WRITE_EXTERNAL_STORAGE, "存储空间", R.drawable.permission_ic_storage))
-    HiPermission.create(this)
-            .title("写入外部存储权限申请")
-            .msg("为了能够正常使用，请开启这些权限吧！")
-            .permissions(permissionItems)
-            .style(R.style.PermissionDefaultBlueStyle)
-            .animStyle(R.style.PermissionAnimScale)
-            .checkMutiPermission(object : PermissionCallback {
-                override fun onClose() {
-                    showToast("用户关闭了权限")
-                }
+abstract class PermissionCallbackAdapter: OnPermission {
+    override fun noPermission(denied: MutableList<String>?, quick: Boolean) {
 
-                override fun onFinish() {
-                }
+    }
 
-                override fun onDeny(permission: String, position: Int) {
-                }
+    override fun hasPermission(granted: MutableList<String>?, isAll: Boolean) {
+    }
 
-                override fun onGuarantee(permission: String, position: Int) {
-                    showToast("权限申请完成")
-                }
-            })
+}
+
+fun Context.checkPermission(activity: Activity, callback: OnPermission) {
+    XXPermissions.with(activity)
+//.constantRequest() //可设置被拒绝后继续申请，直到用户授权或者永久拒绝
+//.permission(Permission.REQUEST_INSTALL_PACKAGES, Permission.SYSTEM_ALERT_WINDOW) //支持请求安装权限和悬浮窗权限
+            .permission(Permission.Group.STORAGE) //支持多个权限组进行请求，不指定则默以清单文件中的危险权限进行请求
+            .request(callback)
 }

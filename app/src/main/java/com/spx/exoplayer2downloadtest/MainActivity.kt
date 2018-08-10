@@ -57,7 +57,11 @@ class MainActivity : AppCompatActivity() {
 
         mediaDataSourceFactory = buildDataSourceFactory(true)
 
-        checkPermission()
+        checkPermission(this, object : PermissionCallbackAdapter(){
+            override fun hasPermission(granted: MutableList<String>?, isAll: Boolean) {
+
+            }
+        })
     }
 
     fun startDownload() {
